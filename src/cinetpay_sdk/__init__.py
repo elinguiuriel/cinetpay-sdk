@@ -1,4 +1,10 @@
-"""Python SDK for the CinetPay API."""
+"""Public package surface for the CinetPay Python SDK.
+
+Applications are expected to import from this module rather than from the
+individual implementation modules. This keeps the user-facing API explicit and
+lets the repository evolve internally without forcing downstream projects to
+track file-level refactors.
+"""
 
 from .client import CinetPayClient, SANDBOX_BASE_URL
 from .exceptions import APIError, AuthenticationError, CinetPayError, NetworkError, ValidationError

@@ -1,4 +1,14 @@
-"""Data models used by the CinetPay SDK."""
+"""Typed request and response models for the CinetPay SDK.
+
+These models do two jobs:
+
+- they expose a stable, typed Python surface to application code
+- they codify the subset of the CinetPay contract that the repository currently
+  validates locally
+
+Keeping this logic in one place makes the rest of the client code read like
+high-level orchestration instead of a collection of ad hoc dictionary lookups.
+"""
 
 from __future__ import annotations
 
@@ -10,6 +20,8 @@ FINAL_STATUSES = {"SUCCESS", "FAILED"}
 
 
 def _as_int(value: Any) -> Optional[int]:
+    """Best-effort integer coercion for CinetPay numeric fields."""
+
     if value is None or value == "":
         return None
     try:
@@ -19,11 +31,15 @@ def _as_int(value: Any) -> Optional[int]:
 
 
 def _is_valid_url(value: str) -> bool:
+    """Return whether a string looks like an absolute URL."""
+
     parsed = urlparse(value)
     return bool(parsed.scheme and parsed.netloc)
 
 
 def _user_from_dict(data: Optional[Mapping[str, Any]]) -> Optional["UserInfo"]:
+    """Build a `UserInfo` object from an optional API dictionary."""
+
     if not data:
         return None
     return UserInfo(
@@ -34,11 +50,15 @@ def _user_from_dict(data: Optional[Mapping[str, Any]]) -> Optional["UserInfo"]:
 
 
 def _clean_payload(payload: Dict[str, Any]) -> Dict[str, Any]:
+    """Drop `None` values before sending a payload to the API."""
+
     return {key: value for key, value in payload.items() if value is not None}
 
 
 @dataclass(frozen=True)
 class UserInfo:
+    """Identity information returned by CinetPay for a customer or account."""
+
     name: Optional[str] = None
     email: Optional[str] = None
     phone_number: Optional[str] = None
@@ -46,6 +66,8 @@ class UserInfo:
 
 @dataclass(frozen=True)
 class AccessToken:
+    """Result returned by the OAuth login endpoint."""
+
     code: Optional[int]
     status: Optional[str]
     access_token: str
@@ -55,6 +77,7 @@ class AccessToken:
 
     @classmethod
     def from_dict(cls, data: Mapping[str, Any]) -> "AccessToken":
+        """Create an access-token model from a raw API response."""
         return cls(
             code=_as_int(data.get("code")),
             status=data.get("status"),
@@ -67,6 +90,13 @@ class AccessToken:
 
 @dataclass(frozen=True)
 class PaymentDetails:
+    """Nested payment status details returned during payment initialization.
+
+    In direct-pay and web-payment initiation flows, CinetPay returns a `details`
+    object that tells the merchant whether the payment is still pending, already
+    final, or requires a redirect to the hosted payment page.
+    """
+
     code: Optional[int] = None
     status: Optional[str] = None
     message: Optional[str] = None
@@ -74,6 +104,7 @@ class PaymentDetails:
 
     @classmethod
     def from_dict(cls, data: Optional[Mapping[str, Any]]) -> Optional["PaymentDetails"]:
+        """Create payment details from a nested response dictionary."""
         if not data:
             return None
         return cls(
@@ -85,11 +116,19 @@ class PaymentDetails:
 
     @property
     def is_final(self) -> bool:
+        """Return whether the embedded payment status is terminal."""
         return bool(self.status in FINAL_STATUSES)
 
 
 @dataclass(frozen=True)
 class PaymentRequest:
+    """Input model used to initialize a payment.
+
+    The fields mirror the payment-initiation documentation currently encoded in
+    the repository contract. `to_payload()` performs local validation and
+    serializes the request into the exact JSON structure expected by the client.
+    """
+
     currency: str
     merchant_transaction_id: str
     amount: int
@@ -107,6 +146,7 @@ class PaymentRequest:
     otp_code: Optional[str] = None
 
     def to_payload(self) -> Dict[str, Any]:
+        """Validate the request and serialize it for the API."""
         self._validate()
         payload = {
             "currency": self.currency,
@@ -128,6 +168,7 @@ class PaymentRequest:
         return _clean_payload(payload)
 
     def _validate(self) -> None:
+        """Validate repository-level payment invariants before the HTTP call."""
         if not self.currency:
             raise ValueError("currency is required")
         if not self.merchant_transaction_id:
@@ -169,6 +210,8 @@ class PaymentRequest:
 
 @dataclass(frozen=True)
 class PaymentResponse:
+    """Response returned after a payment initialization request."""
+
     code: Optional[int]
     status: Optional[str]
     payment_token: Optional[str] = None
@@ -181,6 +224,7 @@ class PaymentResponse:
 
     @classmethod
     def from_dict(cls, data: Mapping[str, Any]) -> "PaymentResponse":
+        """Create a payment-response model from raw API data."""
         return cls(
             code=_as_int(data.get("code")),
             status=data.get("status"),
@@ -195,10 +239,12 @@ class PaymentResponse:
 
     @property
     def should_redirect(self) -> bool:
+        """Return whether the client should redirect the user to `payment_url`."""
         return bool(self.details and self.details.must_be_redirected and self.payment_url)
 
     @property
     def is_final(self) -> bool:
+        """Return whether the payment has already reached a terminal state."""
         if self.details:
             return self.details.is_final
         return bool(self.status in FINAL_STATUSES)
@@ -206,6 +252,8 @@ class PaymentResponse:
 
 @dataclass(frozen=True)
 class PaymentStatusResponse:
+    """Status lookup response for an existing payment."""
+
     code: Optional[int]
     status: Optional[str]
     merchant_transaction_id: Optional[str] = None
@@ -215,6 +263,7 @@ class PaymentStatusResponse:
 
     @classmethod
     def from_dict(cls, data: Mapping[str, Any]) -> "PaymentStatusResponse":
+        """Create a payment-status model from raw API data."""
         return cls(
             code=_as_int(data.get("code")),
             status=data.get("status"),
@@ -226,11 +275,14 @@ class PaymentStatusResponse:
 
     @property
     def is_final(self) -> bool:
+        """Return whether the payment status is terminal."""
         return bool(self.status in FINAL_STATUSES)
 
 
 @dataclass(frozen=True)
 class TransferRequest:
+    """Input model used to create a transfer."""
+
     currency: str
     payment_method: str
     merchant_transaction_id: str
@@ -240,6 +292,7 @@ class TransferRequest:
     notify_url: str
 
     def to_payload(self) -> Dict[str, Any]:
+        """Validate the request and serialize it for the API."""
         self._validate()
         return {
             "currency": self.currency,
@@ -252,6 +305,7 @@ class TransferRequest:
         }
 
     def _validate(self) -> None:
+        """Validate repository-level transfer invariants before the HTTP call."""
         if not self.currency:
             raise ValueError("currency is required")
         if not self.payment_method:
@@ -274,6 +328,8 @@ class TransferRequest:
 
 @dataclass(frozen=True)
 class TransferResponse:
+    """Response returned by transfer creation and transfer status endpoints."""
+
     code: Optional[int]
     status: Optional[str]
     merchant_transaction_id: Optional[str] = None
@@ -285,6 +341,7 @@ class TransferResponse:
 
     @classmethod
     def from_dict(cls, data: Mapping[str, Any]) -> "TransferResponse":
+        """Create a transfer-response model from raw API data."""
         return cls(
             code=_as_int(data.get("code")),
             status=data.get("status"),
@@ -298,11 +355,19 @@ class TransferResponse:
 
     @property
     def is_final(self) -> bool:
+        """Return whether the transfer status is terminal."""
         return bool(self.status in FINAL_STATUSES)
 
 
 @dataclass(frozen=True)
 class BalanceResponse:
+    """Balance lookup response.
+
+    The exact balance payload was not fully specified in the provided CinetPay
+    documentation, so the SDK preserves the flexible part of the response under
+    the `balances` attribute.
+    """
+
     code: Optional[int]
     status: Optional[str]
     balances: Dict[str, Any] = field(default_factory=dict)
@@ -310,6 +375,7 @@ class BalanceResponse:
 
     @classmethod
     def from_dict(cls, data: Mapping[str, Any]) -> "BalanceResponse":
+        """Create a balance-response model from raw API data."""
         balances = {key: value for key, value in data.items() if key not in {"code", "status"}}
         return cls(
             code=_as_int(data.get("code")),
@@ -321,6 +387,8 @@ class BalanceResponse:
 
 @dataclass(frozen=True)
 class NotificationPayload:
+    """Notification payload sent by CinetPay to the merchant webhook."""
+
     notify_token: str
     merchant_transaction_id: Optional[str] = None
     transaction_id: Optional[str] = None
@@ -329,6 +397,7 @@ class NotificationPayload:
 
     @classmethod
     def from_dict(cls, data: Mapping[str, Any]) -> "NotificationPayload":
+        """Create a notification model from a webhook payload."""
         return cls(
             notify_token=str(data.get("notify_token", "")),
             merchant_transaction_id=data.get("merchant_transaction_id"),

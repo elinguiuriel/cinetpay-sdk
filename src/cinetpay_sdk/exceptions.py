@@ -1,4 +1,9 @@
-"""Exceptions raised by the CinetPay SDK."""
+"""Exception hierarchy used across the CinetPay SDK.
+
+The client normalizes transport failures and CinetPay API failures into a small
+set of exception types so application code can react without inspecting raw HTTP
+details everywhere.
+"""
 
 from __future__ import annotations
 
@@ -6,7 +11,12 @@ from typing import Any, Dict, Optional
 
 
 class CinetPayError(Exception):
-    """Base SDK exception."""
+    """Base class for all SDK exceptions.
+
+    The additional attributes mirror the metadata frequently returned by the
+    CinetPay API and allow callers to inspect machine-readable error details
+    without parsing error messages.
+    """
 
     def __init__(
         self,
@@ -26,16 +36,16 @@ class CinetPayError(Exception):
 
 
 class APIError(CinetPayError):
-    """Raised when the API returns an error response."""
+    """Raised when CinetPay responds but rejects the request."""
 
 
 class AuthenticationError(APIError):
-    """Raised when authentication fails or the token is invalid."""
+    """Raised when credentials or access tokens are rejected by CinetPay."""
 
 
 class ValidationError(APIError):
-    """Raised when the API rejects a request payload."""
+    """Raised when the local payload or API parameters are considered invalid."""
 
 
 class NetworkError(CinetPayError):
-    """Raised when the SDK cannot reach the API."""
+    """Raised when the SDK cannot reach the CinetPay API endpoint."""

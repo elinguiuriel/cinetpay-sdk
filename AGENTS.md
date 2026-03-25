@@ -34,6 +34,7 @@ If a change affects runtime behavior, update the contract and the matching harne
 ## Invariants
 
 - Keep the public API small and explicit.
+- Every public module, class, function, method, and property must have a meaningful docstring.
 - Put new behavioral rules in docs and harness scenarios, not just in prose comments.
 - Prefer boring, inspectable stdlib-based code over opaque abstractions.
 - Do not hide CinetPay assumptions in test bodies if they can live in the contract docs or scenario fixtures.

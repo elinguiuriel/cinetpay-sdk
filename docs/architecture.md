@@ -29,6 +29,17 @@ Dependency rules:
 
 These rules are enforced by `tests/test_architecture.py`.
 
+## Documentation Standard
+
+This repository treats code documentation as a mechanical quality property, not a best-effort convention.
+
+- every public module must explain its role
+- every public class must describe its responsibility
+- every public method and property must explain behavior, especially where it encodes an external CinetPay rule
+- internal helpers should be documented when the transformation or control flow is not obvious
+
+These expectations are enforced by `tests/test_documentation.py`.
+
 ## Behavioral Source Of Truth
 
 Behavioral expectations are encoded in three places:

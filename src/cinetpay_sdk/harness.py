@@ -1,4 +1,10 @@
-"""Repository-level acceptance harness for the CinetPay SDK."""
+"""Repository-level acceptance harness for the CinetPay SDK.
+
+The harness turns documented repository expectations into executable scenarios.
+Unlike unit tests that target isolated implementation details, the harness asks
+whether the SDK still behaves according to the contract encoded in the
+repository's scenario fixtures.
+"""
 
 from __future__ import annotations
 
@@ -12,18 +18,29 @@ from .transport import HttpResponse
 
 
 def _default_scenario_dir() -> Path:
+    """Return the default directory containing repository harness scenarios."""
     return Path(__file__).resolve().parents[2] / "harness" / "scenarios"
 
 
 @dataclass(frozen=True)
 class ScenarioResult:
+    """Result of executing one repository harness scenario."""
+
     name: str
     passed: bool
     message: str
 
 
 class ScenarioTransport:
+    """Deterministic transport used by harness scenarios.
+
+    Each scenario provides a fixed sequence of canned HTTP responses. This
+    transport records the outgoing requests so the harness can assert both the
+    returned models and the shape of the HTTP conversation.
+    """
+
     def __init__(self, responses: Iterable[Mapping[str, Any]]) -> None:
+        """Create a transport from a list of scenario response definitions."""
         self._responses = [
             HttpResponse(
                 status_code=int(response["status_code"]),
@@ -43,6 +60,7 @@ class ScenarioTransport:
         json_data: Optional[Dict[str, Any]] = None,
         timeout: float = 30.0,
     ) -> HttpResponse:
+        """Return the next canned response and record the outgoing call."""
         self.calls.append(
             {
                 "method": method,
@@ -57,10 +75,12 @@ class ScenarioTransport:
         return self._responses.pop(0)
 
     def close(self) -> None:
+        """Satisfy the transport protocol without doing anything."""
         return None
 
 
 def load_scenarios(directory: Optional[Path] = None) -> List[Dict[str, Any]]:
+    """Load all JSON scenario definitions from a directory."""
     scenario_dir = directory or _default_scenario_dir()
     if not scenario_dir.exists():
         raise FileNotFoundError(f"Scenario directory not found: {scenario_dir}")
@@ -71,6 +91,7 @@ def load_scenarios(directory: Optional[Path] = None) -> List[Dict[str, Any]]:
 
 
 def _read_path(value: Any, path: str) -> Any:
+    """Resolve a dotted attribute-or-dictionary path from a result object."""
     current = value
     for part in path.split("."):
         if isinstance(current, Mapping):
@@ -81,6 +102,7 @@ def _read_path(value: Any, path: str) -> Any:
 
 
 def _dispatch(client: CinetPayClient, operation: Mapping[str, Any]) -> Any:
+    """Dispatch a scenario operation to the matching client method."""
     name = operation["name"]
     if name == "create_payment":
         return client.create_payment(operation["payload"])
@@ -101,6 +123,7 @@ def _assert_expectations(
     transport: ScenarioTransport,
     expect: Mapping[str, Any],
 ) -> None:
+    """Assert both model-level expectations and the HTTP call sequence."""
     for attr_path, expected in expect.get("attrs", {}).items():
         actual = _read_path(result, attr_path)
         if actual != expected:
@@ -134,6 +157,7 @@ def _assert_expectations(
 
 
 def run_scenario(definition: Mapping[str, Any]) -> ScenarioResult:
+    """Execute one harness scenario and capture its pass/fail result."""
     transport = ScenarioTransport(definition["responses"])
     client = CinetPayClient("key", "password", transport=transport)
     try:
@@ -145,10 +169,12 @@ def run_scenario(definition: Mapping[str, Any]) -> ScenarioResult:
 
 
 def run_repository_harness(directory: Optional[Path] = None) -> List[ScenarioResult]:
+    """Execute every harness scenario found in the given directory."""
     return [run_scenario(definition) for definition in load_scenarios(directory)]
 
 
 def main() -> int:
+    """Run the repository harness as a small CLI entry point."""
     results = run_repository_harness()
     failed = [result for result in results if not result.passed]
     for result in results:
