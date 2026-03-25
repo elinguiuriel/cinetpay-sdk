@@ -41,6 +41,26 @@ Sources de vérité du dépôt:
 
 ## Installation
 
+Depuis ce dépôt GitHub:
+
+```bash
+pip install "git+https://github.com/elinguiuriel/cinetpay-sdk.git"
+```
+
+Depuis une branche précise:
+
+```bash
+pip install "git+https://github.com/elinguiuriel/cinetpay-sdk.git@main"
+```
+
+Depuis un commit précis:
+
+```bash
+pip install "git+https://github.com/elinguiuriel/cinetpay-sdk.git@d22f0a7"
+```
+
+Depuis un clone local du dépôt:
+
 ```bash
 pip install .
 ```
@@ -50,6 +70,11 @@ Pour le développement:
 ```bash
 pip install -e .[dev]
 ```
+
+Guide détaillé d’installation et d’utilisation dans un projet Python:
+
+- `docs/installing-from-github.md`
+- `examples/basic_usage.py`
 
 ## Outils Sandbox
 
@@ -106,6 +131,38 @@ Le package expose principalement:
 - `TransferResponse`
 - `BalanceResponse`
 
+## Installation Dans Un Projet Python
+
+Flux recommandé:
+
+1. créez l’environnement virtuel de votre projet
+2. installez le SDK depuis GitHub
+3. configurez `CINETPAY_API_KEY` et `CINETPAY_API_PASSWORD`
+4. importez `cinetpay_sdk` dans votre code
+
+Exemple complet:
+
+```bash
+python -m venv .venv
+source .venv/bin/activate
+pip install --upgrade pip
+pip install "git+https://github.com/elinguiuriel/cinetpay-sdk.git@main"
+```
+
+Puis:
+
+```bash
+export CINETPAY_API_KEY='your-account-key'
+export CINETPAY_API_PASSWORD='your-account-password'
+export CINETPAY_BASE_URL='https://api.cinetpay.net'
+```
+
+Vérification:
+
+```bash
+python -c "from cinetpay_sdk import CinetPayClient; print(CinetPayClient)"
+```
+
 ## Exemple rapide
 
 ```python
@@ -141,6 +198,24 @@ print(payment.details.status if payment.details else None)
 if payment.should_redirect:
     print("Rediriger le client vers:", payment.payment_url)
 ```
+
+## Utiliser Les Classes Dans Un Programme Python
+
+Exemple minimal d’authentification:
+
+```python
+from cinetpay_sdk import CinetPayClient
+
+client = CinetPayClient.from_env()
+token = client.authenticate()
+
+print(token.status)
+print(token.expires_in)
+```
+
+Exemple de programme plus complet:
+
+- `examples/basic_usage.py`
 
 ## Authentification
 
