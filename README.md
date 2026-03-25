@@ -51,6 +51,42 @@ Pour le développement:
 pip install -e .[dev]
 ```
 
+## Outils Sandbox
+
+Le dépôt contient un CLI pour tester la vraie sandbox CinetPay sans écrire de
+script applicatif à chaque fois:
+
+```bash
+python scripts/sandbox_cli.py env-check
+python scripts/sandbox_cli.py auth
+python scripts/sandbox_cli.py balances
+```
+
+Exemples:
+
+```bash
+python scripts/sandbox_cli.py payment \
+  --amount 100 \
+  --payment-method OM \
+  --client-phone +2250707070700 \
+  --success-url https://example.com/payment/success \
+  --failed-url https://example.com/payment/failed \
+  --notify-url https://webhook.site/replace-me
+```
+
+```bash
+python scripts/sandbox_cli.py transfer \
+  --amount 100 \
+  --payment-method OM_CI \
+  --phone-number +2250707000001 \
+  --notify-url https://webhook.site/replace-me
+```
+
+Documentation détaillée:
+
+- `docs/sandbox-testing.md`
+- `docs/secure-credentials.md`
+
 ## Structure du SDK
 
 Le package expose principalement:
@@ -123,6 +159,34 @@ Variables utilisées:
 - `CINETPAY_API_KEY`
 - `CINETPAY_API_PASSWORD`
 - `CINETPAY_BASE_URL` optionnelle
+
+## Définition sécurisée des credentials
+
+Ne mettez jamais vos clés CinetPay en dur dans:
+
+- le code source
+- le `README`
+- les fichiers de config versionnés
+- les workflows CI commités
+
+Approche recommandée en local:
+
+```bash
+cp .env.example .env
+chmod 600 .env
+```
+
+Puis renseignez les vraies valeurs dans `.env`. Le dépôt ignore déjà ce fichier.
+
+Vous pouvez ensuite utiliser:
+
+```bash
+python scripts/sandbox_cli.py env-check
+```
+
+Pour la procédure complète:
+
+- `docs/secure-credentials.md`
 
 ## Paiement web
 

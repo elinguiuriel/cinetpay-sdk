@@ -15,7 +15,7 @@ def run_step(label: str, command: list[str]) -> None:
 
 
 def main() -> int:
-    run_step("compileall", [sys.executable, "-m", "compileall", "src", "tests"])
+    run_step("compileall", [sys.executable, "-m", "compileall", "src", "tests", "scripts"])
     run_step("unit-tests", [sys.executable, "-m", "unittest", "discover", "-s", "tests", "-v"])
     run_step("harness", [sys.executable, "scripts/run_harness.py"])
     print("[quality] ok")
