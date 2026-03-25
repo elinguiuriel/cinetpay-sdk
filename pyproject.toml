@@ -28,7 +28,7 @@ classifiers = [
 dependencies = []
 
 [project.optional-dependencies]
-dev = ["pytest>=8.0"]
+dev = ["coverage>=7.0", "pytest>=8.0"]
 
 [tool.setuptools]
 package-dir = { "" = "src" }
@@ -38,3 +38,10 @@ where = ["src"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+
+[tool.coverage.run]
+branch = true
+source = ["cinetpay_sdk"]
+
+[tool.coverage.report]
+show_missing = true

@@ -5,6 +5,7 @@ import sys
 import unittest
 from email.message import Message
 from pathlib import Path
+from urllib.error import HTTPError, URLError
 from unittest.mock import patch
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -72,6 +73,40 @@ class TransportTests(unittest.TestCase):
             )
 
         self.assertEqual(captured["user_agent"], "custom-agent/1.0")
+
+    def test_transport_returns_http_error_response(self):
+        headers = Message()
+        headers["Content-Type"] = "application/json"
+        http_error = HTTPError(
+            "https://api.cinetpay.net/v1/payment",
+            403,
+            "Forbidden",
+            headers,
+            io.BytesIO(b'{"status":"FORBIDDEN"}'),
+        )
+        transport = UrllibTransport()
+
+        with patch("cinetpay_sdk.transport.urlopen", side_effect=http_error):
+            response = transport.request("GET", "https://api.cinetpay.net/v1/payment")
+
+        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.json_body["status"], "FORBIDDEN")
+
+    def test_transport_wraps_url_errors_as_network_errors(self):
+        transport = UrllibTransport()
+
+        with patch("cinetpay_sdk.transport.urlopen", side_effect=URLError("offline")):
+            with self.assertRaisesRegex(Exception, "Unable to reach CinetPay API: offline"):
+                transport.request("GET", "https://api.cinetpay.net/v1/payment")
+
+    def test_transport_decode_json_edge_cases_and_close(self):
+        transport = UrllibTransport()
+
+        self.assertEqual(transport._decode_json(b""), {})
+        self.assertEqual(transport._decode_json(b"not-json"), {"raw_body": "not-json"})
+        self.assertEqual(transport._decode_json(b"[1, 2]"), {"data": [1, 2]})
+        self.assertEqual(transport._decode_json(b'{"code": 200}'), {"code": 200})
+        self.assertIsNone(transport.close())
 
 
 if __name__ == "__main__":
