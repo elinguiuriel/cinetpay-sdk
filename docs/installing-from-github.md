@@ -42,7 +42,7 @@ pip install "git+https://github.com/elinguiuriel/cinetpay-sdk.git@main"
 Specific commit:
 
 ```bash
-pip install "git+https://github.com/elinguiuriel/cinetpay-sdk.git@d22f0a7"
+pip install "git+https://github.com/elinguiuriel/cinetpay-sdk.git@<commit-sha>"
 ```
 
 Using `@<commit>` is the safest option for production because your project keeps
@@ -129,7 +129,7 @@ payment = client.create_payment(
         merchant_transaction_id="ORDER-1001",
         amount=1000,
         lang="fr",
-        designation="Paiement abonnement",
+        designation="Subscription payment",
         client_email="client@example.com",
         client_first_name="Jean",
         client_last_name="Doe",
@@ -169,7 +169,7 @@ transfer = client.create_transfer(
         merchant_transaction_id="TRANSFER-1001",
         amount=100,
         phone_number="+2250707000001",
-        reason="Rechargement de compte",
+        reason="Account top-up",
         notify_url="https://merchant.example/transfer-notify",
     )
 )
@@ -227,7 +227,7 @@ try:
             merchant_transaction_id="ORDER-1001",
             amount=1000,
             lang="fr",
-            designation="Paiement test",
+            designation="Test payment",
             client_email="client@example.com",
             client_first_name="Jean",
             client_last_name="Doe",

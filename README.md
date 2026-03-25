@@ -1,85 +1,87 @@
 # CinetPay Python SDK
 
-SDK Python minimaliste pour le nouvel API CinetPay, basé sur la documentation sandbox fournie.
+Minimal Python SDK for the new CinetPay API, based on the sandbox
+documentation provided for this repository.
 
-Base URL sandbox par défaut: `https://api.cinetpay.net`
+Default sandbox base URL: `https://api.cinetpay.net`
 
 ## Harness Engineering
 
-Le dépôt suit désormais une approche "harness-first" inspirée de l'article OpenAI "Harness engineering":
+This repository follows a harness-first approach inspired by OpenAI's "Harness
+engineering" article:
 
-- le dépôt contient ses règles de fonctionnement dans [AGENTS.md](AGENTS.md)
-- le contrat externe CinetPay est synthétisé dans `docs/cinetpay-sandbox-contract.md`
-- les comportements critiques sont encodés dans des scénarios exécutables sous `harness/scenarios/`
-- l'architecture est vérifiée mécaniquement par des tests structurels
-- une boucle courte `python scripts/run_quality.py` sert de porte d'entrée unique
+- the repository stores its operational rules in [AGENTS.md](AGENTS.md)
+- the external CinetPay contract is summarized in `docs/cinetpay-sandbox-contract.md`
+- critical behaviors are encoded as executable scenarios in `harness/scenarios/`
+- the architecture is checked mechanically through structural tests
+- a short `python scripts/run_quality.py` loop acts as the main repository gate
 
-Commandes principales:
+Main commands:
 
 ```bash
 python scripts/run_harness.py
 python scripts/run_quality.py
 ```
 
-Sources de vérité du dépôt:
+Repository sources of truth:
 
 - `AGENTS.md`
 - `docs/architecture.md`
 - `docs/cinetpay-sandbox-contract.md`
 - `harness/scenarios/*.json`
 
-## Fonctionnalités
+## Features
 
-- Authentification OAuth via `POST /v1/oauth/login`
-- Initialisation de paiement web via `POST /v1/payment`
-- Consultation du statut d'un paiement via `GET /v1/payment/{identifier}`
-- Création de transfert via `POST /v1/transfer`
-- Consultation du statut d'un transfert via `GET /v1/transfer/{transaction_id}`
-- Consultation du solde via `GET /v1/balances`
-- Validation simple des notifications `notify_token`
-- Rafraîchissement automatique du token si l'API retourne `1003 EXPIRED_TOKEN`
+- OAuth authentication through `POST /v1/oauth/login`
+- Web payment initialization through `POST /v1/payment`
+- Payment status lookup through `GET /v1/payment/{identifier}`
+- Transfer creation through `POST /v1/transfer`
+- Transfer status lookup through `GET /v1/transfer/{transaction_id}`
+- Balance lookup through `GET /v1/balances`
+- Simple `notify_token` notification validation
+- Automatic token refresh when the API returns `1003 EXPIRED_TOKEN`
 
 ## Installation
 
-Depuis ce dépôt GitHub:
+From the GitHub repository:
 
 ```bash
 pip install "git+https://github.com/elinguiuriel/cinetpay-sdk.git"
 ```
 
-Depuis une branche précise:
+From a specific branch:
 
 ```bash
 pip install "git+https://github.com/elinguiuriel/cinetpay-sdk.git@main"
 ```
 
-Depuis un commit précis:
+From a specific commit:
 
 ```bash
-pip install "git+https://github.com/elinguiuriel/cinetpay-sdk.git@d22f0a7"
+pip install "git+https://github.com/elinguiuriel/cinetpay-sdk.git@<commit-sha>"
 ```
 
-Depuis un clone local du dépôt:
+From a local clone of the repository:
 
 ```bash
 pip install .
 ```
 
-Pour le développement:
+For development:
 
 ```bash
 pip install -e .[dev]
 ```
 
-Guide détaillé d’installation et d’utilisation dans un projet Python:
+Detailed installation and usage guide for a Python project:
 
 - `docs/installing-from-github.md`
 - `examples/basic_usage.py`
 
-## Outils Sandbox
+## Sandbox Tools
 
-Le dépôt contient un CLI pour tester la vraie sandbox CinetPay sans écrire de
-script applicatif à chaque fois:
+The repository includes a CLI for testing the real CinetPay sandbox without
+having to write one-off application scripts each time:
 
 ```bash
 python scripts/sandbox_cli.py env-check
@@ -87,7 +89,7 @@ python scripts/sandbox_cli.py auth
 python scripts/sandbox_cli.py balances
 ```
 
-Exemples:
+Examples:
 
 ```bash
 python scripts/sandbox_cli.py payment \
@@ -107,21 +109,21 @@ python scripts/sandbox_cli.py transfer \
   --notify-url https://webhook.site/replace-me
 ```
 
-Documentation détaillée:
+Detailed documentation:
 
 - `docs/sandbox-testing.md`
 - `docs/secure-credentials.md`
 
-Remarque transport:
+Transport note:
 
-- `api.cinetpay.net` bloque actuellement la signature par défaut `Python-urllib/x.y`
-  via Cloudflare `Error 1010`
-- le SDK envoie donc un `User-Agent` dédié par défaut pour que le transport
-  standard fonctionne contre la sandbox
+- `api.cinetpay.net` currently blocks the default `Python-urllib/x.y`
+  signature through Cloudflare `Error 1010`
+- the SDK therefore sends a dedicated default `User-Agent` so the standard
+  transport works against the sandbox
 
-## Structure du SDK
+## SDK Surface
 
-Le package expose principalement:
+The package primarily exposes:
 
 - `CinetPayClient`
 - `PaymentRequest`
@@ -131,16 +133,16 @@ Le package expose principalement:
 - `TransferResponse`
 - `BalanceResponse`
 
-## Installation Dans Un Projet Python
+## Installing In A Python Project
 
-Flux recommandé:
+Recommended flow:
 
-1. créez l’environnement virtuel de votre projet
-2. installez le SDK depuis GitHub
-3. configurez `CINETPAY_API_KEY` et `CINETPAY_API_PASSWORD`
-4. importez `cinetpay_sdk` dans votre code
+1. create a virtual environment for your project
+2. install the SDK from GitHub
+3. configure `CINETPAY_API_KEY` and `CINETPAY_API_PASSWORD`
+4. import `cinetpay_sdk` in your application code
 
-Exemple complet:
+Complete example:
 
 ```bash
 python -m venv .venv
@@ -149,7 +151,7 @@ pip install --upgrade pip
 pip install "git+https://github.com/elinguiuriel/cinetpay-sdk.git@main"
 ```
 
-Puis:
+Then:
 
 ```bash
 export CINETPAY_API_KEY='your-account-key'
@@ -157,13 +159,13 @@ export CINETPAY_API_PASSWORD='your-account-password'
 export CINETPAY_BASE_URL='https://api.cinetpay.net'
 ```
 
-Vérification:
+Verification:
 
 ```bash
 python -c "from cinetpay_sdk import CinetPayClient; print(CinetPayClient)"
 ```
 
-## Exemple rapide
+## Quick Example
 
 ```python
 from cinetpay_sdk import CinetPayClient, PaymentRequest
@@ -180,7 +182,7 @@ payment = client.create_payment(
         merchant_transaction_id="ORDER-1001",
         amount=1000,
         lang="fr",
-        designation="Paiement abonnement",
+        designation="Subscription payment",
         client_email="client@example.com",
         client_first_name="Jean",
         client_last_name="Doe",
@@ -196,12 +198,12 @@ print(payment.payment_url)
 print(payment.details.status if payment.details else None)
 
 if payment.should_redirect:
-    print("Rediriger le client vers:", payment.payment_url)
+    print("Redirect the user to:", payment.payment_url)
 ```
 
-## Utiliser Les Classes Dans Un Programme Python
+## Using The Classes In A Python Program
 
-Exemple minimal d’authentification:
+Minimal authentication example:
 
 ```python
 from cinetpay_sdk import CinetPayClient
@@ -213,22 +215,22 @@ print(token.status)
 print(token.expires_in)
 ```
 
-Exemple de programme plus complet:
+For a more complete application-style example:
 
 - `examples/basic_usage.py`
 
-## Authentification
+## Authentication
 
-Le client s'authentifie automatiquement au premier appel protégé.
+The client authenticates automatically on the first protected request.
 
-Vous pouvez aussi forcer l'authentification:
+You can also force authentication:
 
 ```python
 token = client.authenticate()
 print(token.access_token)
 ```
 
-Vous pouvez aussi charger les identifiants depuis les variables d'environnement:
+You can also load credentials from environment variables:
 
 ```python
 from cinetpay_sdk import CinetPayClient
@@ -236,58 +238,60 @@ from cinetpay_sdk import CinetPayClient
 client = CinetPayClient.from_env()
 ```
 
-Variables utilisées:
+Variables used:
 
 - `CINETPAY_API_KEY`
 - `CINETPAY_API_PASSWORD`
-- `CINETPAY_BASE_URL` optionnelle
+- `CINETPAY_BASE_URL` optional
 
-## Définition sécurisée des credentials
+## Secure Credential Setup
 
-Ne mettez jamais vos clés CinetPay en dur dans:
+Never hardcode CinetPay credentials in:
 
-- le code source
-- le `README`
-- les fichiers de config versionnés
-- les workflows CI commités
+- source code
+- the `README`
+- versioned configuration files
+- committed CI workflow files
 
-Approche recommandée en local:
+Recommended local setup:
 
 ```bash
 cp .env.example .env
 chmod 600 .env
 ```
 
-Puis renseignez les vraies valeurs dans `.env`. Le dépôt ignore déjà ce fichier.
+Then fill in the real values in `.env`. The repository already ignores that
+file.
 
-Vous pouvez ensuite utiliser:
+You can then run:
 
 ```bash
 python scripts/sandbox_cli.py env-check
 ```
 
-Pour la procédure complète:
+For the full procedure:
 
 - `docs/secure-credentials.md`
 
-## Paiement web
+## Web Payments
 
 ```python
 status = client.get_payment_status("payment-token-or-transaction-id")
 print(status.status)
 ```
 
-La documentation fournie indique que l'identifiant accepté peut être:
+The provided documentation says the accepted identifier can be:
 
 - `payment_token`
 - `transaction_id`
 - `merchant_transaction_id`
 
-Le SDK transmet simplement la valeur dans l'URL `GET /v1/payment/{identifier}`.
+The SDK simply passes that value into the `GET /v1/payment/{identifier}` URL.
 
-## Paiement direct
+## Direct Pay
 
-Le SDK vous laisse activer `direct_pay=True`. Dans ce cas, `client_phone_number` devient obligatoire.
+The SDK lets you enable `direct_pay=True`. In that case,
+`client_phone_number` becomes mandatory.
 
 ```python
 payment = client.create_payment(
@@ -297,7 +301,7 @@ payment = client.create_payment(
         merchant_transaction_id="ORDER-1002",
         amount=500,
         lang="fr",
-        designation="Paiement direct",
+        designation="Direct payment",
         client_email="client@example.com",
         client_first_name="Jean",
         client_last_name="Doe",
@@ -315,7 +319,7 @@ if payment.details:
     print(payment.details.message)
 ```
 
-## Transferts
+## Transfers
 
 ```python
 from cinetpay_sdk import TransferRequest
@@ -327,7 +331,7 @@ transfer = client.create_transfer(
         merchant_transaction_id="TRANSFER-1001",
         amount=100,
         phone_number="+2250707000001",
-        reason="Rechargement de compte",
+        reason="Account top-up",
         notify_url="https://merchant.test/transfer/notify",
     )
 )
@@ -336,20 +340,21 @@ print(transfer.status)
 print(transfer.transaction_id)
 ```
 
-Puis:
+Then:
 
 ```python
 transfer_status = client.get_transfer_status(transfer.transaction_id)
 print(transfer_status.status)
 ```
 
-## Solde
+## Balances
 
-Le format détaillé de réponse n'est pas documenté dans le contenu fourni. Le SDK retourne donc:
+The exact response shape was not fully documented in the provided material, so
+the SDK returns:
 
 - `code`
 - `status`
-- `balances`: toutes les autres clés de la réponse
+- `balances`: every other key from the response
 
 ```python
 balances = client.get_balances()
@@ -359,7 +364,7 @@ print(balances.balances)
 
 ## Notifications
 
-Exemple de validation d'un `notify_token` reçu via votre endpoint:
+Example of validating a received `notify_token` in your endpoint:
 
 ```python
 from cinetpay_sdk import CinetPayClient
@@ -380,15 +385,15 @@ if CinetPayClient.validate_notification(payload, expected_notify_token="4bbd93ce
     payment_status = client.get_payment_status(notification.transaction_id)
 ```
 
-Bon usage côté serveur:
+Recommended server-side flow:
 
-- conservez le `notify_token` reçu lors de l'initialisation
-- comparez-le à celui reçu dans la notification POST
-- vérifiez ensuite le statut final auprès de l'API CinetPay
+- store the `notify_token` returned during payment initialization
+- compare it with the token received in the POST notification
+- then confirm the final status with the CinetPay API
 
 ## Exceptions
 
-Le SDK expose:
+The SDK exposes:
 
 - `CinetPayError`
 - `APIError`
@@ -396,7 +401,7 @@ Le SDK expose:
 - `ValidationError`
 - `NetworkError`
 
-Exemple:
+Example:
 
 ```python
 from cinetpay_sdk import APIError, CinetPayClient, NetworkError
@@ -404,35 +409,37 @@ from cinetpay_sdk import APIError, CinetPayClient, NetworkError
 try:
     balances = client.get_balances()
 except NetworkError as exc:
-    print("Erreur réseau:", exc)
+    print("Network error:", exc)
 except APIError as exc:
-    print("Erreur API:", exc.code, exc.status, exc.payload)
+    print("API error:", exc.code, exc.status, exc.payload)
 ```
 
-## Numéros de test sandbox
+## Sandbox Test Numbers
 
-D'après la documentation fournie:
+According to the provided documentation:
 
-- Côte d'Ivoire succès immédiat: `+2250707070700`
-- Côte d'Ivoire pending puis succès: `+2250707070701`
-- Côte d'Ivoire échec immédiat: `+2250707070703`
-- Côte d'Ivoire pending puis échec: `+2250707070704`
-- Côte d'Ivoire pending infini: `+2250707070706`
-- Transfert sandbox: `+2250707000001`
+- Ivory Coast immediate success: `+2250707070700`
+- Ivory Coast pending then success: `+2250707070701`
+- Ivory Coast immediate failure: `+2250707070703`
+- Ivory Coast pending then failure: `+2250707070704`
+- Ivory Coast infinite pending: `+2250707070706`
+- Transfer sandbox number: `+2250707000001`
 
-## Hypothèses prises dans cette première version
+## Assumptions In This First Version
 
-- Le bearer token est envoyé dans l'en-tête `Authorization: Bearer <token>`
-- Le endpoint `GET /v1/payment/{identifier}` accepte les identifiants décrits dans la documentation fournie
-- Le format détaillé de `GET /v1/balances` n'étant pas documenté dans votre extrait, il est conservé de manière flexible
+- The bearer token is sent in the `Authorization: Bearer <token>` header
+- The `GET /v1/payment/{identifier}` endpoint accepts the identifiers described
+  in the provided documentation
+- Because `GET /v1/balances` was not fully specified in the excerpt, the SDK
+  keeps that payload shape flexible
 
-## Développement local
+## Local Development
 
 ```bash
 python scripts/run_quality.py
 ```
 
-Si vous voulez uniquement exécuter les tests:
+If you only want to run the tests:
 
 ```bash
 python -m unittest discover -s tests -v

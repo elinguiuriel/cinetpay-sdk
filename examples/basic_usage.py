@@ -33,7 +33,7 @@ def create_web_payment(client: CinetPayClient) -> None:
             merchant_transaction_id="ORDER-1001",
             amount=1000,
             lang="fr",
-            designation="Paiement exemple",
+            designation="Example payment",
             client_email="client@example.com",
             client_first_name="Jean",
             client_last_name="Doe",
@@ -67,7 +67,7 @@ def create_transfer(client: CinetPayClient) -> None:
             merchant_transaction_id="TRANSFER-1001",
             amount=100,
             phone_number="+2250707000001",
-            reason="Rechargement de compte",
+            reason="Account top-up",
             notify_url="https://merchant.example/transfer/notify",
         )
     )

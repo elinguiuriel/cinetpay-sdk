@@ -82,7 +82,7 @@ class CinetPayClientTests(unittest.TestCase):
                         "details": {
                             "code": 2001,
                             "status": "INITIATED",
-                            "message": "Veuillez cliquer sur le lien pour continuer le paiement",
+                            "message": "Please click the link to continue the payment",
                             "must_be_redirected": True,
                         },
                     },
@@ -131,7 +131,7 @@ class CinetPayClientTests(unittest.TestCase):
                     json_body={
                         "code": 1003,
                         "status": "EXPIRED_TOKEN",
-                        "message": "Le jeton d'authentification a expiré",
+                        "message": "The authentication token has expired",
                     },
                 ),
                 HttpResponse(
