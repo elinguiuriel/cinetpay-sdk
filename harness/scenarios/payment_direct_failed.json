@@ -1,0 +1,74 @@
+{
+  "name": "payment_direct_failed",
+  "description": "A direct payment may finish immediately with FAILED and must not request a redirect.",
+  "reference": "docs/cinetpay-sandbox-contract.md#payments",
+  "responses": [
+    {
+      "status_code": 200,
+      "json_body": {
+        "code": 200,
+        "status": "OK",
+        "access_token": "token-123",
+        "token_type": "bearer",
+        "expires_in": 86400
+      }
+    },
+    {
+      "status_code": 200,
+      "json_body": {
+        "code": 200,
+        "status": "OK",
+        "payment_token": "payment-token",
+        "notify_token": "notify-token",
+        "transaction_id": "transaction-123",
+        "merchant_transaction_id": "order-124",
+        "payment_url": "https://secure.cinetpay.net/payment/payment-token",
+        "details": {
+          "code": 2010,
+          "status": "FAILED",
+          "message": "Paiement echoue",
+          "must_be_redirected": false
+        }
+      }
+    }
+  ],
+  "operation": {
+    "name": "create_payment",
+    "payload": {
+      "currency": "XOF",
+      "payment_method": "OM",
+      "merchant_transaction_id": "order-124",
+      "amount": 500,
+      "lang": "fr",
+      "designation": "Direct payment",
+      "client_email": "direct@example.com",
+      "client_first_name": "Jane",
+      "client_last_name": "Doe",
+      "client_phone_number": "+2250707000000",
+      "success_url": "https://merchant.test/success",
+      "failed_url": "https://merchant.test/failed",
+      "notify_url": "https://merchant.test/notify",
+      "direct_pay": true,
+      "otp_code": "1234"
+    }
+  },
+  "expect": {
+    "attrs": {
+      "details.status": "FAILED",
+      "details.must_be_redirected": false,
+      "should_redirect": false,
+      "is_final": true
+    },
+    "call_sequence": [
+      {
+        "method": "POST",
+        "path": "/v1/oauth/login"
+      },
+      {
+        "method": "POST",
+        "path": "/v1/payment",
+        "authorization": "Bearer token-123"
+      }
+    ]
+  }
+}

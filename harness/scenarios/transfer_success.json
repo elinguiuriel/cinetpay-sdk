@@ -1,0 +1,64 @@
+{
+  "name": "transfer_success",
+  "description": "A successful transfer should expose final status, amount, fee, and transaction id.",
+  "reference": "docs/cinetpay-sandbox-contract.md#transfers",
+  "responses": [
+    {
+      "status_code": 200,
+      "json_body": {
+        "code": 200,
+        "status": "OK",
+        "access_token": "token-123",
+        "token_type": "bearer",
+        "expires_in": 86400
+      }
+    },
+    {
+      "status_code": 200,
+      "json_body": {
+        "code": 100,
+        "status": "SUCCESS",
+        "merchant_transaction_id": "transfer-1001",
+        "transaction_id": "transfer-transaction-123",
+        "amount": 100,
+        "fee_amount": 2,
+        "user": {
+          "name": "Doe John",
+          "email": "john.doe@gmail.com",
+          "phone_number": "+2250707000001"
+        }
+      }
+    }
+  ],
+  "operation": {
+    "name": "create_transfer",
+    "payload": {
+      "currency": "XOF",
+      "payment_method": "OM_CI",
+      "merchant_transaction_id": "transfer-1001",
+      "amount": 100,
+      "phone_number": "+2250707000001",
+      "reason": "Rechargement de compte",
+      "notify_url": "https://merchant.test/transfer/notify"
+    }
+  },
+  "expect": {
+    "attrs": {
+      "status": "SUCCESS",
+      "is_final": true,
+      "amount": 100,
+      "fee_amount": 2
+    },
+    "call_sequence": [
+      {
+        "method": "POST",
+        "path": "/v1/oauth/login"
+      },
+      {
+        "method": "POST",
+        "path": "/v1/transfer",
+        "authorization": "Bearer token-123"
+      }
+    ]
+  }
+}
