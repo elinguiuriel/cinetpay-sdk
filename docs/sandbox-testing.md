@@ -98,3 +98,11 @@ Useful numbers from the repository contract:
 
 The CLI prints JSON suitable for copying into bug reports or test notes.
 Sensitive credentials are never printed in full.
+
+## Transport Note
+
+The sandbox currently rejects the default `Python-urllib/x.y` user-agent with a
+Cloudflare `Error 1010: browser_signature_banned`.
+
+The repository transport therefore sends a dedicated SDK user-agent by default.
+If you replace the transport layer in your own application, keep that in mind.

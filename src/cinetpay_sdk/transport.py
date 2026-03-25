@@ -16,6 +16,8 @@ from urllib.request import Request, urlopen
 
 from .exceptions import NetworkError
 
+DEFAULT_USER_AGENT = "cinetpay-sdk-python/0.1.0"
+
 
 @dataclass(frozen=True)
 class HttpResponse:
@@ -54,6 +56,15 @@ class UrllibTransport:
     and convert lower-level connectivity errors into `NetworkError`.
     """
 
+    def __init__(self, *, user_agent: str = DEFAULT_USER_AGENT) -> None:
+        """Create a transport with a configurable default user-agent.
+
+        CinetPay's Cloudflare layer currently rejects the default
+        `Python-urllib/x.y` signature with error 1010. Using a dedicated SDK
+        user-agent keeps the stdlib transport functional against the sandbox.
+        """
+        self.user_agent = user_agent
+
     def request(
         self,
         method: str,
@@ -75,6 +86,7 @@ class UrllibTransport:
             body = json.dumps(json_data).encode("utf-8")
             request_headers.setdefault("Content-Type", "application/json")
         request_headers.setdefault("Accept", "application/json")
+        request_headers.setdefault("User-Agent", self.user_agent)
 
         request = Request(url=url, data=body, headers=request_headers, method=method.upper())
 

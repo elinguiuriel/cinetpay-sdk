@@ -285,8 +285,10 @@ class CinetPayClient:
         status = payload.get("status")
         message = (
             payload.get("message")
+            or payload.get("detail")
+            or payload.get("title")
             or payload.get("error")
-            or status
+            or (str(status) if status is not None else None)
             or f"CinetPay API request failed with HTTP {http_status}"
         )
         if code in _AUTH_ERROR_CODES:

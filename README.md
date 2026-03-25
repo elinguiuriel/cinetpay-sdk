@@ -87,6 +87,13 @@ Documentation détaillée:
 - `docs/sandbox-testing.md`
 - `docs/secure-credentials.md`
 
+Remarque transport:
+
+- `api.cinetpay.net` bloque actuellement la signature par défaut `Python-urllib/x.y`
+  via Cloudflare `Error 1010`
+- le SDK envoie donc un `User-Agent` dédié par défaut pour que le transport
+  standard fonctionne contre la sandbox
+
 ## Structure du SDK
 
 Le package expose principalement:
